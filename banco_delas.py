@@ -65,15 +65,54 @@ class Mulher(Cliente):
     def mulher(self):
         return self._mulher
 
+    @mulher.setter
+    def mulher(self, valor: bool):
+        self._mulher = valor
+
+    @property
+    def cheque_especial(self):
+        if self.mulher == True:
+            return self._cheque_especial
+        else:
+            return 0.0
+
+    def __str__(self):
+        return (
+            f'Cliente: {self.nome}, ' +
+            f'telefone: {self.telefone}, ' +
+            f'renda mensal: {self.renda_mensal}, ' +
+            f'cheque especial: {self.cheque_especial}, ' +
+            f'se considera mulher? {self.mulher} '
+        )
+
 
 class Not_mulher(Cliente):
     def __init__(self, nome, telefone, renda_mensal):
         super().__init__(nome, telefone, renda_mensal)
-        self._cheque_especial = 0.0
 
     @property
     def cheque_especial(self):
-        return self._cheque_especial
+        if self.mulher == False:
+            return 0.0
+        else:
+            return self._cheque_especial
+
+    @property
+    def mulher(self):
+        return self._mulher
+
+    @mulher.setter
+    def mulher(self, valor: bool):
+        self._mulher = valor
+
+    def __str__(self):
+        return (
+            f'Cliente: {self.nome}, ' +
+            f'telefone: {self.telefone}, ' +
+            f'renda mensal: {self.renda_mensal}, ' +
+            f'cheque especial: {self.cheque_especial}, ' +
+            f'se considera mulher? {self.mulher} '
+        )
 
 
 class Conta_corrente:
@@ -81,16 +120,18 @@ class Conta_corrente:
         self._titular = []
         self._numero_da_conta = numero_da_conta
         self._saldo = 0.0
-        self._cheque_especial_total = 0.0
         self.status = False
+        self._cheque_especial_total = 0.0
+        self._cheque_especial_inicial = 0.0
 
     @property
     def titular(self):
         return self._titular
 
     @titular.setter
-    def titular(self, valor):
+    def titular(self, valor: Cliente):
         self._titular.append(valor)
+        self.atualiza_cheque_especial()
 
     @property
     def numero_da_conta(self):
@@ -104,27 +145,39 @@ class Conta_corrente:
     def saldo(self):
         return self._saldo
 
-    @saldo.setter
-    def saldo(self, valor: float):
-        self._saldo = valor
-
+    @property
     def cheque_especial_total(self):
+        return self._cheque_especial_total
+
+    def atualiza_cheque_especial(self):
+        self._cheque_especial_total = 0.0
         for i in range(0, len(self._titular)):
             self._cheque_especial_total += float(self.titular[i].cheque_especial)
-        return self._cheque_especial_total
+        self._cheque_especial_inicial = self._cheque_especial_total
+        if self._saldo < 0.0:
+            self._cheque_especial_total += self._saldo 
 
     def depositar(self, valor):
         if self.status:
-            self._saldo += valor
+            if self._saldo < 0.0:
+                if (self._saldo + valor) <= 0.0:
+                    self._cheque_especial_total += valor
+                    self._saldo += valor
+                else:
+                    self._cheque_especial_total = self._cheque_especial_inicial
+                    self._saldo += valor
+            else:
+                self._saldo += valor
         else:
             print('Operação não realizada. Conta inativa.')
 
     def sacar(self, valor):
         if self.status:
-            if (self.saldo - valor) >= 0.0:
-                self.saldo -= valor
-            elif abs(self.saldo - valor) <= self._cheque_especial_total:
-                self.saldo -= self.cheque_especial_total - valor
+            if (self._saldo - valor) >= 0.0:
+                self._saldo -= valor
+            elif abs(self._saldo - valor) <= self._cheque_especial_total:
+                self._saldo -= valor
+                self._cheque_especial_total += self._saldo
             else:
                 print('Operação não realizada. Saldo insuficiente.')
         else:
@@ -133,7 +186,7 @@ class Conta_corrente:
     def apresenta_titulares(self):
         nomes = ''
         for i in range(0, len(self.titular)):
-            nomes = nomes + f'{i + 1}: {self.titular[i].nome}, '
+            nomes = nomes + f'{i + 1}: {self.titular[i].nome} '
         return nomes
 
     def __str__(self):
@@ -141,7 +194,7 @@ class Conta_corrente:
             f'Conta {self.numero_da_conta}, ' + 
             f'Titular(es): {self.apresenta_titulares()}, ' + 
             f'Saldo: {self.saldo}, ' + 
-            f'Cheque especial disponível: {self.cheque_especial_total()}, ' + 
+            f'Cheque especial disponível: {self.cheque_especial_total}, ' + 
             f'Ativa: {self.status}'
         )
 
@@ -152,6 +205,7 @@ class Banco_Delas:
 
     def menu(self):
         print('Sistema Banco Delas. Qual operação que deseja realizar? \n')
+        print('Contas abertas:')
         print(*self.contas_abertas)
         print('1 - Abrir conta')
         print('2 - Consultar dados de uma conta')
@@ -168,16 +222,26 @@ class Banco_Delas:
             numero = input('Digite o número da conta: ')
             if self.buscar_conta(numero) != False:
                 print(self.buscar_conta(numero))
+                print(self.buscar_conta(numero).titular)
             else:
-                print('Conta não encontrada.')
+                self.buscar_conta(numero)
             self.menu()
         elif opcao_menu == '3':
             numero = input('Digite o número da conta: ')
             if self.buscar_conta(numero) != False:
                 print(self.buscar_conta(numero))
-                valor = float(input('Digite o valor a ser sacado: '))
+                while True:
+                    try:
+                        valor = float(input('Digite o valor a ser sacado: '))
+                        if valor < 0.0:
+                            raise ValueError('Insira um número positivo.')
+                    except ValueError as e:
+                        print('Valor inválido: ', e)
+                    else:
+                        break
                 self.buscar_conta(numero).sacar(valor)
                 print(f'Saldo atual: {self.buscar_conta(numero).saldo}')
+                print(f'Cheque especial disponível: {self.buscar_conta(numero).cheque_especial_total}')
             else:
                 self.buscar_conta(numero)
             self.menu()
@@ -185,9 +249,18 @@ class Banco_Delas:
             numero = input('Digite o número da conta: ')
             if self.buscar_conta(numero) != False:
                 print(self.buscar_conta(numero))
-                valor = float(input('Digite o valor a ser depositado: '))
+                while True:
+                    try:
+                        valor = float(input('Digite o valor a ser depositado: '))
+                        if valor < 0.0:
+                            raise ValueError('Insira um número positivo.')
+                    except ValueError as e:
+                        print('Valor inválido: ', e)
+                    else:
+                        break
                 self.buscar_conta(numero).depositar(valor)
                 print(f'Saldo atual: {self.buscar_conta(numero).saldo}')
+                print(f'Cheque especial disponível: {self.buscar_conta(numero).cheque_especial_total}')
             else:
                 self.buscar_conta(numero)
             self.menu()
@@ -204,11 +277,12 @@ class Banco_Delas:
 
     def buscar_conta(self, numero: str):
         for i in range(0, len(self.contas_abertas)):
-            if self.contas_abertas[i].numero_da_conta == numero:
+            if (self.contas_abertas[i]).numero_da_conta == numero:
                 return self.contas_abertas[i]
             else:
-                print('Conta não encontrada')
-                return False
+                if i == (len(self.contas_abertas) - 1):
+                    print('Conta não encontrada')
+                    return False
 
     def abrir_conta(self):
         numero = f'{self.random_generator(6)}-{self.random_generator(1)}'
@@ -217,7 +291,6 @@ class Banco_Delas:
         print(f'Criação da conta número {conta.numero_da_conta} em andamento.')
         self.adicionar_titular(conta)
         self.contas_abertas.append(conta)
-        print(conta)
         self.menu()
 
     def adicionar_titular(self, conta: Conta_corrente):
@@ -233,10 +306,18 @@ class Banco_Delas:
                 conta.titular = Not_mulher(nome, telefone, renda)
             else:
                 conta.titular = Not_mulher(nome, telefone, renda)
+            while True:
+                try:
+                    opcao_cadastrar = input(
+                        'Deseja cadastrar mais titulares para essa conta?'
+                        '(1 - Sim | 2 - Não): ')
+                    if not (opcao_cadastrar == '1' or opcao_cadastrar == '2'):
+                        raise ValueError('Opção inválida.')
+                except ValueError as e:
+                    print(e)
+                else:
+                    break
 
-            opcao_cadastrar = input(
-                'Deseja cadastrar mais titulares para essa conta?'
-                '(1 - Sim | 2 - Não): ')
 
     def fechar_conta(self):
         numero = input('Número da conta a ser desativada: ')
@@ -264,7 +345,8 @@ class Banco_Delas:
                     '1 - Adicionar titular \n'
                     '2 - Remover titular \n'
                     '3 - Alterar dados de titular \n'
-                    '4 - Voltar'
+                    '4 - Voltar \n'
+                    'Opção número: '
                 )
             )
 
@@ -282,6 +364,7 @@ class Banco_Delas:
                     print(self.buscar_conta(numero).apresenta_titulares())
                     escolha_remove = int(input('Titular número: '))
                     del self.buscar_conta(numero).titular[escolha_remove - 1]
+                    self.buscar_conta(numero).atualiza_cheque_especial()
 
             def opcao3():
                 escolha_alterar = int(
@@ -290,12 +373,13 @@ class Banco_Delas:
                         '1 - Nome de um titular \n' +
                         '2 - Telefone de um titular \n' +
                         '3 - Renda mensal de um titular \n' +
-                        '4 - Autodeclaração de gênero \n' +
-                        '5 - Voltar'
+                        '4 - Identidade de gênero \n' +
+                        '5 - Voltar \n' +
+                        'Opção número: '
                     )
                 )
 
-                def opcao3_1():
+                def opcao31():
                     print(f'De qual titular deseja alterar o nome?')
                     print(self.buscar_conta(numero).apresenta_titulares())
                     escolha_nome = int(input('Titular número: '))
@@ -311,7 +395,7 @@ class Banco_Delas:
                         print('Operação abortada. voltando ao menu principal...')
                         opcoes.get(4)()
 
-                def opcao3_2():
+                def opcao32():
                     print(f'De qual titular deseja alterar o telefone?')
                     print(self.buscar_conta(numero).apresenta_titulares())
                     escolha_telefone = int(input('Titular número: '))
@@ -330,7 +414,7 @@ class Banco_Delas:
                         print('Operação abortada. voltando ao menu principal...')
                         opcoes.get(4)()
 
-                def opcao3_3():
+                def opcao33():
                     print(f'De qual titular deseja alterar a renda mensal?')
                     print(self.buscar_conta(numero).apresenta_titulares())
                     escolha_renda = int(input('Titular número: '))
@@ -342,20 +426,38 @@ class Banco_Delas:
                         )
                     )
                     confirmacao = input(
-                        f'Confirma a alteração da renda mensal do titular {titular}' +
+                        f'Confirma a alteração da renda mensal do titular {titular} ' +
                         f'de {renda_antiga} para {renda}? \n' +
                         '1 - Sim | 2 - Não'
                     )
                     if confirmacao == '1':
                         self.buscar_conta(numero).titular[escolha_renda - 1].renda_mensal = renda
+                        self.buscar_conta(numero).atualiza_cheque_especial()
+                    else:
+                        print('Operação abortada. Voltando ao menu principal...')
+                        opcoes.get(4)()
+
+                def opcao34():
+                    print(f'De qual titular deseja alterar a identidade de gênero?')
+                    print(self.buscar_conta(numero).apresenta_titulares())
+                    escolha_genero = int(input('Titular número: '))
+                    titular = self.buscar_conta(numero).titular[escolha_genero - 1].nome
+                    genero_antigo = self.buscar_conta(numero).titular[escolha_genero - 1].mulher
+                    confirmacao = input(
+                        f'Confirma a alteração da identidade de gênero de {titular} para mulher: {not(genero_antigo)}?\n' +
+                        '1 - Sim | 2 - Não'
+                    )
+                    if confirmacao == '1':
+                        self.buscar_conta(numero).titular[escolha_genero - 1].mulher = not(genero_antigo)
+                        self.buscar_conta(numero).atualiza_cheque_especial()
                     else:
                         print('Operação abortada. voltando ao menu principal...')
                         opcoes.get(4)()
 
-                def opcao3_4():
+                def opcao35():
                     opcoes.get(4)()
 
-                opcoes_alteracao = {1: opcao3_1, 2: opcao3_2, 3: opcao3_3, 4: opcao3_4}
+                opcoes_alteracao = {1: opcao31, 2: opcao32, 3: opcao33, 4: opcao34, 5: opcao35}
                 opcoes_alteracao.get(escolha_alterar)()
 
             def opcao4():
@@ -376,4 +478,4 @@ class Banco_Delas:
 
 
 banco = Banco_Delas()
-# banco.menu()
+banco.menu()

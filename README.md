@@ -6,7 +6,7 @@
 
 ## Enunciado do problema:
 
-##### O banco Banco Delas é um banco moderno e eficiente, com vantagens exclusivas para clientes mulheres.  
+#### O banco Banco Delas é um banco moderno e eficiente, com vantagens exclusivas para clientes mulheres.  
 
 Modele um sistema orientado a objetos para representar contas correntes do Banco Delas seguindo os requisitos abaixo:  
 

@@ -31,7 +31,7 @@ A identificação dos atores do problema levou à criação das classes:
 - Conta_corrente;
 - Banco_Delas.
 
-Um objetivo pessoal alcançado foi desenvolver o sistema de forma que todas as operações, desde o cadastro, abertura de conta e alteração de dados dos clientes até a desativação de uma conta, fossem realizadas através de um menu. Assim, não é necessário que o programador insira valores diretamente no código. Ao executar o arquivo o sistema é aberto e pode-se abrir contas, cadastrar clientes e fazer operações. 
+Um objetivo pessoal alcançado foi desenvolver o sistema de forma que todas as operações, desde o cadastro, abertura de conta e alteração de dados dos clientes até a desativação de uma conta, fossem realizadas através de um menu. Assim, não é necessário que o programador insira valores diretamente no código. Basta criar um objeto da classe ***Banco_Delas*** e chamar o método **menu()**, assim um menu é apresentado e através dele pode-se abrir contas, cadastrar clientes e fazer operações. 
 
 A seguir segue a descrição de cada classe e seus respectivos atributos e métodos.
 
@@ -123,4 +123,33 @@ Prótotipo das contas a serem cadastradas no banco.
     7. atualiza o valor do **saldo** para o valor dele *menos* o valor sacado, e finaliza;
     8. escreve na tela a mensagem "Operação não realizada. Saldo insuficiente." e finaliza
     9. escreve na tela a mensagem "Operação não realizada. Conta inativa." e finaliza.
+- **apresenta_titulares()**: percorre a lista de titulares **titular** e pega somente o valor do atributo **nome** de cada cliente. Então apresenta os nomes dos titulares de forma enumerada.
+
+
+### Classe Banco_Delas
+
+#### Atributos
+
+- **self.contas_abertas**: uma lista para guardar as contas abertas no banco.
+
+#### Métodos
+
+- **menu**: é o menu principal. Através dele todas as operações são realizadas: cadastro de clientes, abertura de contas, etc. O menu se apresenta da seguinte forma:
+    > Sistema Banco Delas. Qual operação que deseja realizar?
+
+    > [Apresenta as contas abertas.]
+
+    > 1 - Abrir conta
+
+    > 2 - Consultar dados de uma conta
+
+    > 3 - Fazer um saque
+    
+    > 4 - Fazer um depósito
+    
+    > 5 - Alterar dados de uma conta
+    
+    > 6 - Desativar uma conta
+    
+    > 7 - Sair
 

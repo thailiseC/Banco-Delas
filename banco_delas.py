@@ -106,8 +106,12 @@ class Conta_corrente:
             if (self.saldo - valor) >= 0.0:
                 self.saldo -= valor
             elif abs(self.saldo - valor) <= self.cheque_especial_total:
-                self.saldo -= valor
-                self.cheque_especial_total += self.saldo
+                if self.saldo <= 0.0:
+                    self.saldo -= valor
+                    self.cheque_especial_total -= valor
+                else:
+                    self.saldo -= valor
+                    self.cheque_especial_total += self.saldo
             else:
                 print('Operação não realizada. Saldo insuficiente.')
         else:

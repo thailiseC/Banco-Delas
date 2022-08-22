@@ -99,7 +99,7 @@ class Conta_corrente:
             else:
                 self.saldo += valor
         else:
-            print('Operação não realizada. Conta inativa.')
+            print('Operação não realizada. Conta inativa. ')
 
     def sacar(self, valor):
         if self.status:

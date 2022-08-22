@@ -117,7 +117,7 @@ Prótotipo das contas a serem cadastradas no banco.
     1. verifica se o **status** da conta é *True*. Caso sim, executa o passo ii. Caso não, executa o passo ix; 
     2. verifica se o resultado da subtração entre o valor do **saldo** e o valor sacado é maior ou igual a zero. Caso sim, executa o passo vii. Caso não, executa o passo iii;
     3. verifica se o módulo absoluto do resultado da subtração entre o valor do **saldo** e o valor sacado é menor ou igual ao valor do **cheque_especial_total**. Caso sim, executa o passo iv. Caso não, executa o passo viii;
-    4. verifica se o saldo é menor ou igual a zero. Caso sim, executa o passo v. Caso não, executa o passo vi;
+    4. verifica se o **saldo** é menor ou igual a zero. Caso sim, executa o passo v. Caso não, executa o passo vi;
     5. executa o passo vi, porém antes de finalizar atualiza o valor do **cheque_especial_total** para o valor dele mesmo *menos* o valor do novo sacado;
     6. executar o passo vi, porém antes de finalizar atualiza o valor do **cheque_especial_total** para o valor dele mesmo somado ao valor do novo **saldo** calculado;
     7. atualiza o valor do **saldo** para o valor dele *menos* o valor sacado, e finaliza;
